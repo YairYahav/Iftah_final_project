@@ -1,0 +1,1 @@
+In this folder you'd put your often used widgets that are used everywhere.

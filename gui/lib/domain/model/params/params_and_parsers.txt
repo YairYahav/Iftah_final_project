@@ -1,0 +1,6 @@
+In this folder, we add our params and parsers,, they are very similiar to data classes 
+but they are specifically for, configs and parameters needed for managers and not 
+for moving information around the app.
+
+The params are used to organize the information from the configs, and the parsers are used 
+to parse the config into params.

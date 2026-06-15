@@ -1,0 +1,7 @@
+In this folder we add repositories, repositories are 
+an indepent part of the domain that handles big amounts of information and connects the manager 
+layer to the UI logic layer of the bloc, repositories are initialized at the start of the app and opperate 
+during the full life-cycle of the app.
+
+For more information about the repository pattern:
+https://www.geeksforgeeks.org/repository-design-pattern/

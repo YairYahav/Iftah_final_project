@@ -1,0 +1,25 @@
+<configuration>
+    <kafka_configuration>
+      <bootstrap_servers>
+      localhost:9092
+      </bootstrap_servers>
+    </kafka_configuration>
+    <topics>
+      <topic>
+        <topic_name>
+                  example_topic
+        </topic_name>
+        <topic_description>
+                  example how to use a topic in kafka 
+        </topic_description>
+      </topic>
+      <topic>
+        <topic_name>
+                  example_http_request_topic
+        </topic_name>
+        <topic_description>
+                  example how to use a http request topic in kafka from http server 
+        </topic_description>
+      </topic>
+    </topics>
+  </configuration>

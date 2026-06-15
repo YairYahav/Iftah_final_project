@@ -1,0 +1,10 @@
+{    
+    "_comment":"This is an example for the often used communication config",
+    "Connection":"UDP",
+    "IP":"1.2.3.4",
+    "OwnIP":"4.3.2.1",
+    "Port":"12345",
+    "AttemptReconnection":"true",
+    "IsUsingTransreceiver":"true",
+    "TimeBetweenReconnection":"0"
+}

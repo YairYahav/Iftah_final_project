@@ -1,0 +1,2 @@
+In this folder we add utils functions that we use throughout our app, 
+this is for repeated functions that can appear in different parts of our app.

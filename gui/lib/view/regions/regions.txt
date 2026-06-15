@@ -1,0 +1,6 @@
+Regions are an over arching widgets that contains a single responsibilty 
+and occupy the same space on the screen, for example:
+
+A region that contains all the widgets that are related to weapon control -> weapon control region.
+
+A region contains many widgets and can contain many blocs depending on the region's function.

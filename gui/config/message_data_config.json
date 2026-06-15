@@ -1,0 +1,11 @@
+{
+    "_comment":"This is an example for the often used message data config",
+    "ServoPwm1": "0",
+    "ServoPwm2": "0",
+    "ServoPwm3": "0",
+    "ServoPwm4": "0",
+    "PwmChannel1":"0",
+    "PwmChannel2":"0",
+    "PwmChannel3":"0",
+    "PwmChannel4":"0"
+}  

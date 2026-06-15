@@ -1,0 +1,2 @@
+In this folder we add our interfaces, An interface is a contract for a class, 
+defining a set of methods the class must implement.

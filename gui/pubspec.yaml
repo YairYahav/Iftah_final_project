@@ -1,0 +1,47 @@
+name: example_project
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  protobuf: ^2.1.0
+  binary: ^3.0.1
+  equatable: ^2.0.3
+  cupertino_icons: ^1.0.2
+  flutter_bloc: ^8.1.1
+  syncfusion_flutter_gauges: ^20.4.44
+  getwidget: ^3.1.1
+  flutter_animate: ^3.1.0
+  group_button: ^5.2.2
+  get_it_mixin: ^3.1.4+2
+  dartssh2: ^2.7.3
+  event_bus: ^2.0.0
+  flutter_libserialport: ^0.3.0
+  octavius_message_api:
+    path: ../packages/octavius_api
+  video_module:
+    path: ../packages/video_plugin/video_module
+  win32: ^5.5.4
+  get_it: ^7.6.0
+  synchronized: ^3.1.0
+  udp: ^5.0.3
+  stroke_text: ^0.0.2
+  neon_widgets: ^2.0.0
+  media_kit: ^1.1.10+1
+  media_kit_video: ^1.2.4
+  media_kit_libs_video: ^1.0.4
+  media_kit_libs_windows_video: ^1.0.9
+
+
+flutter:
+  uses-material-design: true
