@@ -50,3 +50,33 @@ class ConstStrings:
     LOG_MODE = "a"
     LOG_FORMATTER = "%(asctime)s - %(levelname)s - %(message)s"
     DATE_TIME_FORMAT = '%Y_%m_%d-%H_%M_%S'
+
+
+
+
+    # Environment variable names
+    ENABLE_IMSHOW_ENVIRONMENT = "ENABLE_IMSHOW"
+    DISPLAY_ENVIRONMENT = "DISPLAY"
+
+    # Shared memory paths and pipeline templates (aligned with video manager)
+    SHARED_MEMORY_CAM_PATH = "/dev/shm/cam{camera_id}"
+    SHARED_MEMORY_PATH = "/dev/shm/"
+    SHARED_MEMORY_PIPELINE = (
+        "appsrc is-live=true do-timestamp=true ! "
+        "video/x-raw,format=BGR,width={frame_width},height={frame_height},framerate={frame_rate}/1 ! "
+        "videoconvert ! videoscale ! "
+        "video/x-raw,format=I420,width={scaled_width},height={scaled_height} ! "
+        "shmsink socket-path={shared_memory_path} sync=false wait-for-connection=false shm-size=200000000"
+    )
+    SHARED_MEMORY_READER_PIPELINE = (
+        "shmsrc socket-path={shared_memory_path} is-live=true do-timestamp=true ! "
+        "video/x-raw,format=I420,width={frame_width},height={frame_height},framerate={frame_rate}/1 ! "
+        "videoconvert ! video/x-raw,format=BGR ! "
+        "appsink drop=true sync=false"
+    )
+
+
+
+    MOTION_STARTING = "Motion detection enabled"
+    MOTION_REGION_COUNT = "Video {}: motion regions: {}"
+    MOTION_ERROR = "Motion detection error: {}"

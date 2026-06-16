@@ -2,3 +2,4 @@ kafka-python
 fuzzywuzzy
 python-Levenshtein
 zmq
+numpy

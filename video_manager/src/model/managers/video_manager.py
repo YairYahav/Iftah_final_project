@@ -3,7 +3,9 @@ import threading
 import os
 import logging
 from typing import Any, Dict, List, Optional
+from xml.sax import handler
 
+from algorithm.src.infrastructure.factories.handler_factory import HandlerFactory
 from infrastructure.interfaces.managers.ivideo_manager import IVideoManager
 from infrastructure.interfaces.iconfig_manager import IConfigManager
 from infrastructure.interfaces.ikafka_manager import IKafkaManager
@@ -11,6 +13,7 @@ from globals.consts.const_strings import ConstStrings
 from globals.consts.consts import Consts
 from globals.consts.logger_messages import LoggerMessages
 from infrastructure.factories.logger_factory import LoggerFactory
+from video_manager.src.model.handlers.video_handler import VideoHandler
 
 
 class VideoManager(IVideoManager):
@@ -44,26 +47,54 @@ class VideoManager(IVideoManager):
             self.stop
 
 
-
     def stop(self) -> None:
-        pass
+        self._running = False
 
-    def _init_threading(self) -> None:
-        self._message_produce_threading = threading.Thread(
-            target=self._produce_kafka_message
-        )
-        self._message_produce_threading.start()
+        for h in self._handlers:
+            h.release()
 
-    def _init_consumers(self) -> None:
-        self._kafka_manager.start_consuming(
-            self._example_topic_consumer, self._print_consumer)
+        for t in self._process_video_threads:
+            t.join()
 
-    def _produce_kafka_message(self) -> None:
-        while (True):
-            time.sleep(Consts.SEND_MESSAGE_DURATION)
-            self._kafka_manager.send_message(
-                ConstStrings.EXAMPLE_TOPIC, ConstStrings.EXAMPLE_MESSAGE)
+        self._logger.log(ConstStrings.LOG_NAME_DEBUG, 
+                         LoggerMessages.VIDEO_MANAGER_STOPPED)
 
-    def _print_consumer(self, msg: str) -> None:
-        self._logger.log(ConstStrings.LOG_NAME_DEBUG,
-                         LoggerMessages.EXAMPLE_PRINT_CONSUMER_MSG.format(str(msg)))
+    def _init_video_handler(self) -> None:
+        for v in self._video_config:
+            video_id = v.get('video_id')
+            video_path = v.get('video_path')
+
+
+            video_handler = HandlerFactory.create_video_handler(video_id, video_path)
+            self._handlers.append(video_handler)
+            video_handler.start()
+
+    def _process_frames(self, video_index: int) -> None:
+        handler = self._handlers[video_index]
+
+        while self._running:
+            frame = handler.read_frame()
+
+            if frame is not None:
+                handler.write_frame(frame)
+            else:
+                self._logger.log(ConstStrings.LOG_NAME_WARNING, 
+                                 LoggerMessages.VIDEO_FRAME_READ_FAILED.format(video_index))
+                break
+
+    def _remove_memory_files(self) -> None:
+        file_prefix = ["cam", "shmpipe"]
+        shm_path = ConstStrings.SHARED_MEMORY_PATH
+
+        if os.path.exists(shm_path):
+            for filename in os.listdir(shm_path):
+                if any(filename.startswith(prefix) for prefix in file_prefix):
+                    file_path = os.path.join(shm_path, filename)
+                    try:
+                        os.remove(file_path)
+                        self._logger.log(ConstStrings.LOG_NAME_DEBUG, 
+                                         LoggerMessages.REMOVED_MEMORY_FILE.format(file_path))
+                    except Exception as e:
+                        self._logger.log(ConstStrings.LOG_NAME_ERROR, 
+                                         LoggerMessages.FAILED_TO_REMOVE_MEMORY_FILE.format(file_path, str(e)))
+                        

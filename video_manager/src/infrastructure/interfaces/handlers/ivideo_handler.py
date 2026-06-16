@@ -17,5 +17,5 @@ class IVideoHandler(ABC):
         pass
 
     @abstractmethod
-    def stop(self) -> None:
+    def release(self) -> None:
         pass

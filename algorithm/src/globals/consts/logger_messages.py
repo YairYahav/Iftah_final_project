@@ -22,3 +22,9 @@ class LoggerMessages:
     ZMQ_JSON_DECODE_ERROR = "Failed to decode JSON from message on topic '{}': {}"
     ZMQ_SUBSCRIBER_THREAD_ERROR = "ZMQ error in subscriber thread: {}"
     ZMQ_MANAGER_NOT_RUNNING = "Cannot publish, manager is not running."
+
+    ALGORITHM_MANAGER_STOPPED = "Algorithm manager stopped"
+    ALGORITHM_MANAGER_STARTED = "Algorithm manager started"
+    MOTION_STARTING = "Motion detection enabled"
+    MOTION_ERROR = "Motion detection error: {}"
+    MOTION_REGION_COUNT = "Video {}: motion regions detected: {}"
