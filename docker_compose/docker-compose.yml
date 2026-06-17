@@ -1,76 +1,165 @@
-version: '3.7'
-
 services:
-
-  zookeeper:
-    image: bitnami/zookeeper:latest # change the image depending on your OS/ARCH
+  algorithm:
+    build: 
+      context: ../algorithm
+      dockerfile: Dockerfile
+    container_name: algorithm
     network_mode: host
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-      ALLOW_ANONYMOUS_LOGIN: "yes"
-    ports:
-      - 2181:2181
-
-  kafka:
-    image: bitnami/kafka:3.4.1 # change the image depending on your OS/ARCH
-    network_mode: host
+    restart: unless-stopped
     depends_on:
-      - zookeeper
+      - video_manager
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: localhost:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
-
-  microservice_python_template:
-    build: ../microservice_python_template
-    network_mode: host
-    stdin_open: true 
-    tty: true 
-    restart: always
-    privileged: true   
-    depends_on:
-      - kafka
-    ports:
-      - "8081:8081"
-      - 8003:8003
-    environment:
-      SCHEMA_REGISTRY_HOST_NAME: localhost
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'localhost:2181'
-      SCHEMA_REGISTRY_LISTENERS: http://localhost:8081
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://localhost:9092
-      SCHEMA_REGISTRY_DEBUG: 'true' 
-      ZMQ_SERVER_HOST: ${ZMQ_SERVER_HOST} 
-      ZMQ_SERVER_PORT: ${ZMQ_SERVER_PORT}
+      LOG_FILE_PATH: /app/logs/algorithm.log
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+      ENABLE_IMSHOW: 1
+      RECORDS_DIR: /app/records
     volumes:
-      - ${MICROSERVICE_PYTHON_TEMPLATE_SOURCE_CODE_PATH_WINDOWS}:/app/src # change the path on the host side as needed in the .env file
-      - ${CONFIG_PATH_WINDOWS}:/app/config/configuration.xml # change the path on the host side as needed in the .env file
-    command: bash -c " python3 src/main.py"
+      - ../logs:/app/logs
+      - ../records:/app/records
+      - /dev/shm:/dev/shm
+      - /tmp/.X11-unix:/tmp/.X11-unix
 
-  api_gateway_microservice_template:
-    build: ../api_gateway_microservice_template
+  gui:
+    build: 
+      context: ..
+      dockerfile: gui/Dockerfile
+    container_name: gui
     network_mode: host
-    stdin_open: true 
-    tty: true 
-    restart: always
-    privileged: true   
+    restart: unless-stopped
     depends_on:
-      - kafka
+      - video_manager
     environment:
-      SCHEMA_REGISTRY_HOST_NAME: localhost
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'localhost:2181'
-      SCHEMA_REGISTRY_LISTENERS: http://localhost:8081
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://localhost:9092
-      SCHEMA_REGISTRY_DEBUG: 'true' 
-      HTTP_SERVER_HOST: ${API_GATEWAY_HTTP_SERVER_HOST}
-      HTTP_SERVER_PORT: ${API_GATEWAY_HTTP_SERVER_PORT}
-      ZMQ_SERVER_HOST: ${API_GATEWAY_ZMQ_SERVER_HOST}
-      ZMQ_SERVER_PORT: ${API_GATEWAY_ZMQ_SERVER_PORT}
+      LOG_FILE_PATH: /app/logs/gui.log
+      DISPLAY: ${DISPLAY}
+      QT_X11_NO_MITSHM: 1
+      LIBGL_ALWAYS_SOFTWARE: 1
     volumes:
-      - ${API_GATEWAY_MICROSERVICE_TEMPLATE_SOURCE_CODE_PATH_WINDOWS}:/app/src # change the path on the host side as needed in the .env file
-      - ${CONFIG_PATH_WINDOWS}:/app/config/configuration.xml # change the path on the host side as needed in the .env file
-    command: bash -c " python3 src/main.py"
+      - ../logs:/app/logs
+      - ../records:/app/records
+      - /dev/shm:/dev/shm
+      - /tmp/.X11-unix:/tmp/.X11-unix
+
+  video_manager:
+    build: 
+      context: ../video_manager
+      dockerfile: Dockerfile
+    container_name: video_manager
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      LOG_FILE_PATH: /app/logs/video_manager.log
+      VIDEO_SOURCE: /app/videos/hoourses_video.mp4
+      VIDEO_WIDTH: 1080
+      VIDEO_HEIGHT: 1920
+      VIDEO_FPS: 30
+      VIDEO_SHM_PATH: /dev/shm/video_frames
+    volumes:
+      - ../logs:/app/logs
+      - ../videos:/app/videos
+      - /dev/shm:/dev/shm
+    command: python3 src/main.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # version: '3.7'
+
+# services:
+
+#   zookeeper:
+#     image: bitnamilegacy/zookeeper:latest # change the image depending on your OS/ARCH
+#     # image: bitnami/zookeeper:latest # change the image depending on your OS/ARCH
+#     network_mode: host
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
+#       ZOOKEEPER_TICK_TIME: 2000
+#       ALLOW_ANONYMOUS_LOGIN: "yes"
+#     ports:
+#       - 2181:2181
+
+#   kafka:
+#     image: bitnamilegacy/kafka:3.4.1 # change the image depending on your OS/ARCH
+#     # image: bitnami/kafka:3.4.1 # change the image depending on your OS/ARCH
+#     network_mode: host
+#     depends_on:
+#       - zookeeper
+#     environment:
+#       KAFKA_BROKER_ID: 1
+#       KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+#       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
+#       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+#       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+
+#   microservice_python_template:
+#     build: ../microservice_python_template
+#     network_mode: host
+#     stdin_open: true 
+#     tty: true 
+#     restart: always
+#     privileged: true   
+#     depends_on:
+#       - kafka
+#     ports:
+#       - "8081:8081"
+#       - 8003:8003
+#     environment:
+#       SCHEMA_REGISTRY_HOST_NAME: localhost
+#       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'localhost:2181'
+#       SCHEMA_REGISTRY_LISTENERS: http://localhost:8081
+#       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://localhost:9092
+#       SCHEMA_REGISTRY_DEBUG: 'true' 
+#       ZMQ_SERVER_HOST: ${ZMQ_SERVER_HOST} 
+#       ZMQ_SERVER_PORT: ${ZMQ_SERVER_PORT}
+#     volumes:
+#       - ${MICROSERVICE_PYTHON_TEMPLATE_SOURCE_CODE_PATH_WINDOWS}:/app/src # change the path on the host side as needed in the .env file
+#       - ${CONFIG_PATH_WINDOWS}:/app/config/configuration.xml # change the path on the host side as needed in the .env file
+#     command: bash -c " python3 src/main.py"
+
+#   api_gateway_microservice_template:
+#     build: ../api_gateway_microservice_template
+#     network_mode: host
+#     stdin_open: true 
+#     tty: true 
+#     restart: always
+#     privileged: true   
+#     depends_on:
+#       - kafka
+#     environment:
+#       SCHEMA_REGISTRY_HOST_NAME: localhost
+#       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: 'localhost:2181'
+#       SCHEMA_REGISTRY_LISTENERS: http://localhost:8081
+#       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://localhost:9092
+#       SCHEMA_REGISTRY_DEBUG: 'true' 
+#       HTTP_SERVER_HOST: ${API_GATEWAY_HTTP_SERVER_HOST}
+#       HTTP_SERVER_PORT: ${API_GATEWAY_HTTP_SERVER_PORT}
+#       ZMQ_SERVER_HOST: ${API_GATEWAY_ZMQ_SERVER_HOST}
+#       ZMQ_SERVER_PORT: ${API_GATEWAY_ZMQ_SERVER_PORT}
+#     volumes:
+#       - ${API_GATEWAY_MICROSERVICE_TEMPLATE_SOURCE_CODE_PATH_WINDOWS}:/app/src # change the path on the host side as needed in the .env file
+#       - ${CONFIG_PATH_WINDOWS}:/app/config/configuration.xml # change the path on the host side as needed in the .env file
+#     command: bash -c " python3 src/main.py"
