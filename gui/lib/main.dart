@@ -1,14 +1,30 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'package:flutter/material.dart';
-import 'package:example_project/view/pages/main_page.dart';
-import 'infrastructure/get_it.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_to_do_list/bloc/video_streams/video_streams_bloc.dart';
+import 'view/pages/video_streams_page.dart';
 
-///This is your main here you add all the processes you want to start before your UI is built.
 void main() {
-  registerManager();
-  checkTypeConnection();
-  initVideo();
-  init();
-  runApp(const MainPage());
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => VideoStreamsBloc(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Video Streams GUI',
+        theme: ThemeData.dark(useMaterial3: true).copyWith(
+          scaffoldBackgroundColor: const Color(0xFF121212),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color(0xFF1E1E1E),
+          ),
+        ),
+        home: const VideoStreamsPage(),
+      ),
+    );
+  }
 }

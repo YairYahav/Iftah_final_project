@@ -1,2 +1,0 @@
-In this folder we add the data classes, data classes are classes that are used to organize information under
-one object to more easily move information around the app, through events and streams. 

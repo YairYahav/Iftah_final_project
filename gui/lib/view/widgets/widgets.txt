@@ -1,2 +1,0 @@
-In this folder you put your widgets, and sub-widgets. 
-You might also want to add folder inside this folder to help keep organized.

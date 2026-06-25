@@ -1,5 +1,0 @@
-{
-  "VideoFomrat":"Gstreamer",
-  "VideoStreamSource": "videotestsrc pattern=21 ! decodebin ! videoconvert ! videoscale ! video/x-raw,format=RGBA,width=720,height=576 ! appsink name=appsink max-buffers=1 drop=1 sync=false",
-  "VideoRecordingStreamSource": "videotestsrc pattern=21 ! video/x-raw,width=720,height=480,format=RGBA ! watchdog timeout=2000"
-}

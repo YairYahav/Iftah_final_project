@@ -1,6 +1,6 @@
 {
-    "name": "example_project",
-    "short_name": "example_project",
+    "name": "flutter_to_do_list",
+    "short_name": "flutter_to_do_list",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

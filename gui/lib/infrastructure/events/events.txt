@@ -1,6 +1,0 @@
-In this folder you add your EventBus events, event bus is an event aggregator,
-that allows us to send events between different layers and parts of our app.
-An event class is an object that can pass information through. 
-
-For more information about EventBus:
-https://pub.dev/documentation/event_bus/latest/

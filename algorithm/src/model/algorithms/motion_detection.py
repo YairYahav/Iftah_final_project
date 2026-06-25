@@ -59,12 +59,15 @@ class MotionDetection:
             self._logger.log(ConstStrings.LOG_NAME_ERROR, "MotionDetection not properly initialized.")
             return frame
 
+        # Apply background subtraction to detect motion
         fg_mask = self._motion_bg_subtractor.apply(frame)
 
+        # Apply mask rectangle if specified 
         if self._mask_rect is not None:
             x, y, w, h = self._mask_rect
             cv2.rectangle(fg_mask, (x, y), (x + w, y + h), 0, -1)
 
+        # Apply thresholding to get binary image
         if self._mask_rect is not None:
             x, y, w, h = self._mask_rect
             if self._draw_mask:
@@ -73,9 +76,11 @@ class MotionDetection:
                 frame = cv2.addWeighted(frame, 1.0, overlay, 0.5, 0)
         _, fg_mask = cv2.threshold(fg_mask, 244, 255, cv2.THRESH_BINARY)
 
+        # Apply morphological operations to reduce noise and fill gaps
         if self._erode_iter > 0:
             fg_mask = cv2.erode(fg_mask, self._kernel, iterations=self._erode_iter)
 
+        # Apply dilation to fill in gaps and enhance the detected regions
         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (Consts.MOTION_KERNEL_SIZE, Consts.MOTION_KERNEL_SIZE))
         fg_mask = cv2.dilate(fg_mask, kernel, iterations=self._dilate_iter)
 
@@ -83,6 +88,7 @@ class MotionDetection:
 
         regions_of_motion = 0
 
+        # Iterate through contours and filter based on area 
         for contour in contours:
             area = cv2.contourArea(contour)
             if area < self._min_counter_area:
@@ -92,6 +98,7 @@ class MotionDetection:
             if self._draw_bounding_boxes:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
+        # Update frame index and log motion detection
         self._frame_index += 1
         if regions_of_motion > 0 and (self._frame_index % max(1, Consts.DEFAULT_FRAME_RATE) == 0):
             try:

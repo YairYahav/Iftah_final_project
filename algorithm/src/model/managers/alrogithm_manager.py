@@ -1,6 +1,6 @@
 import time
 import threading
-import cv2
+import cv2 # type: ignore
 import os
 import numpy as np
 from typing import Any, Dict, List, Optional
