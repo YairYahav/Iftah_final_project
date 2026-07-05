@@ -8,6 +8,7 @@ services:
     restart: unless-stopped
     depends_on:
       - video_manager
+      - kafka
     environment:
       LOG_FILE_PATH: /app/logs/algorithm.log
       DISPLAY: ${DISPLAY}
@@ -17,28 +18,31 @@ services:
     volumes:
       - ../logs:/app/logs
       - ../records:/app/records
+      - ../docker_compose/configuration.xml:/app/config/configuration.xml:ro
       - /dev/shm:/dev/shm
       - /tmp/.X11-unix:/tmp/.X11-unix
 
   gui:
     build: 
-      context: ..
-      dockerfile: gui/Dockerfile
+      context: ../gui
+      dockerfile: Dockerfile
     container_name: gui
     network_mode: host
     restart: unless-stopped
     depends_on:
       - video_manager
+      - kafka
     environment:
-      LOG_FILE_PATH: /app/logs/gui.log
+      LOG_FILE_PATH: /app/gui/logs/gui.log
       DISPLAY: ${DISPLAY}
       QT_X11_NO_MITSHM: 1
       LIBGL_ALWAYS_SOFTWARE: 1
     volumes:
-      - ../logs:/app/logs
-      - ../records:/app/records
+      - ../logs:/app/gui/logs
+      - ../records:/app/gui/records
       - /dev/shm:/dev/shm
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ./gui_logs:/app/logs
 
   video_manager:
     build: 
@@ -48,17 +52,47 @@ services:
     network_mode: host
     restart: unless-stopped
     environment:
-      LOG_FILE_PATH: /app/logs/video_manager.log
-      VIDEO_SOURCE: /app/videos/hoourses_video.mp4
+      LOG_FILE_PATH: /app/video_manager/logs/video_manager.log
+      VIDEO_SOURCE: /app/video_manager/videos/hoourses_video.mp4
       VIDEO_WIDTH: 1080
       VIDEO_HEIGHT: 1920
       VIDEO_FPS: 30
       VIDEO_SHM_PATH: /dev/shm/video_frames
     volumes:
-      - ../logs:/app/logs
-      - ../videos:/app/videos
+      - ../logs:/app/video_manager/logs
+      - ../videos:/app/video_manager/videos
       - /dev/shm:/dev/shm
+      - ../docker_compose/configuration.xml:/app/config/configuration.xml:ro
     command: python3 src/main.py
+  
+
+  zookeeper:
+    image: bitnamilegacy/zookeeper:latest # change the image depending on your OS/ARCH
+    # image: bitnami/zookeeper:latest # change the image depending on your OS/ARCH
+    network_mode: host
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_ENABLE_ADMIN_SERVER: "no" # Disable the admin server to avoid port conflicts because of host networking
+      JVMFLAGS: "-Dzookeeper.admin.enableServer=false -Dzookeeper.admin.serverPort=-1" 
+    ports:
+      - 2181:2181
+
+  kafka:
+    image: bitnamilegacy/kafka:3.4.1 # change the image depending on your OS/ARCH
+    # image: bitnami/kafka:3.4.1 # change the image depending on your OS/ARCH
+    network_mode: host
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
 
 
 
