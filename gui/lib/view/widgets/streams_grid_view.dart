@@ -21,7 +21,7 @@ class StreamsGridView extends StatelessWidget {
           
           if (isWide) {
             return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: streams.map((stream) {
                 return Expanded(
                   child: Padding(

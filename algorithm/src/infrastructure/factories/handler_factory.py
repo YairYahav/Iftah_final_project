@@ -1,5 +1,5 @@
 import os
-from algorithm.src.model.handlers.shm_reader_hamdler import ShmRenderHandler
+from model.handlers.shm_reader_hamdler import ShmRenderHandler
 from infrastructure.factories.infrastructure_factory import InfrastructureFactory
 from globals.consts.const_strings import ConstStrings
 from infrastructure.interfaces.ishm_handler import IShmHandler

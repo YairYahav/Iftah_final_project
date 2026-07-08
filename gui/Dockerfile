@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     libstdc++-12-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /app/gui
 
 # Copy Flutter project files
 COPY pubspec.* ./
@@ -25,10 +25,12 @@ RUN flutter config --enable-linux-desktop
 RUN flutter build linux --release
 
 # Set the built app as the working directory
-WORKDIR /app/build/linux/x64/release/bundle
+WORKDIR /app/gui/build/linux/x64/release/bundle
 
 # Set environment for software rendering
 ENV LIBGL_ALWAYS_SOFTWARE=1
+
+RUN mkdir -p /app/logs
 
 # Run the Flutter desktop app
 CMD ["./flutter_to_do_list"]

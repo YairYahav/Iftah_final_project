@@ -5,7 +5,7 @@ import logging
 from typing import Any, Dict, List, Optional
 from xml.sax import handler
 
-from algorithm.src.infrastructure.factories.handler_factory import HandlerFactory
+from infrastructure.factories.handler_factory import HandlerFactory
 from infrastructure.interfaces.managers.ivideo_manager import IVideoManager
 from infrastructure.interfaces.iconfig_manager import IConfigManager
 from infrastructure.interfaces.ikafka_manager import IKafkaManager
@@ -13,7 +13,7 @@ from globals.consts.const_strings import ConstStrings
 from globals.consts.consts import Consts
 from globals.consts.logger_messages import LoggerMessages
 from infrastructure.factories.logger_factory import LoggerFactory
-from video_manager.src.model.handlers.video_handler import VideoHandler
+from model.handlers.video_handler import VideoHandler
 
 
 class VideoManager(IVideoManager):
@@ -32,7 +32,7 @@ class VideoManager(IVideoManager):
 
     def start(self) -> None:
         for i in range(self._videos_count):
-            thread = threading.Thread(target=self._process_video_threads, args=(i,))
+            thread = threading.Thread(target=self._process_frames, args=(i,))
             self._process_video_threads.append(thread)
             thread.start()
 
@@ -44,7 +44,7 @@ class VideoManager(IVideoManager):
                 time.sleep(1)
 
         except KeyboardInterrupt:
-            self.stop
+            self.stop()
 
 
     def stop(self) -> None:
@@ -63,9 +63,10 @@ class VideoManager(IVideoManager):
         for v in self._video_config:
             video_id = v.get('video_id')
             video_path = v.get('video_path')
+            width = v.get('width')
+            height = v.get('height')
 
-
-            video_handler = HandlerFactory.create_video_handler(video_id, video_path)
+            video_handler = HandlerFactory.create_video_handler(video_id, video_path, width, height)
             self._handlers.append(video_handler)
             video_handler.start()
 
@@ -80,7 +81,7 @@ class VideoManager(IVideoManager):
             else:
                 self._logger.log(ConstStrings.LOG_NAME_WARNING, 
                                  LoggerMessages.VIDEO_FRAME_READ_FAILED.format(video_index))
-                break
+                time.sleep(0.1)  # brief pause before retry
 
     def _remove_memory_files(self) -> None:
         file_prefix = ["cam", "shmpipe"]

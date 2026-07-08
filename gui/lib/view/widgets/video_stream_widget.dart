@@ -44,30 +44,51 @@ class _VideoStreamWidgetState extends State<VideoStreamWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: widget.stream.isActive
-              ? Colors.green.withOpacity(0.5)
-              : Colors.red.withOpacity(0.5),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          StreamHeader(stream: widget.stream),
-          const Divider(height: 1, color: Color(0xFF333333)),
-          _buildStreamContent(),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bounded = constraints.hasBoundedHeight;
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: widget.stream.isActive
+                  ? Colors.green.withOpacity(0.5)
+                  : Colors.red.withOpacity(0.5),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: bounded ? MainAxisSize.max : MainAxisSize.min,
+            children: [
+              StreamHeader(stream: widget.stream),
+              const Divider(height: 1, color: Color(0xFF333333)),
+              bounded
+                  ? Expanded(child: _buildStreamContentFill())
+                  : _buildStreamContentAspect(),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildStreamContent() {
+  // Wide layout: fill available bounded height, BoxFit.contain handles aspect ratio
+  Widget _buildStreamContentFill() {
+    return Container(
+      color: Colors.black,
+      alignment: Alignment.center,
+      child: widget.stream.isActive
+          ? _buildActiveContent()
+          : const StreamInactiveWidget(),
+    );
+  }
+
+  // Narrow/scroll layout: use natural aspect ratio
+  Widget _buildStreamContentAspect() {
+    final aspectRatio = widget.stream.id == '1' ? 9.0 / 16.0 : 16.0 / 9.0;
     return AspectRatio(
-      aspectRatio: 16 / 9,
+      aspectRatio: aspectRatio,
       child: Container(
         color: Colors.black,
         child: widget.stream.isActive
@@ -85,7 +106,7 @@ class _VideoStreamWidgetState extends State<VideoStreamWidget> {
     }
 
     // Fallback: try the legacy JPG frame path used previously in the project
-    final fallbackImage = '/app/logs/stream_${widget.stream.id}.jpg';
+    final fallbackImage = '/app/gui/logs/stream_${widget.stream.id}.jpg';
     return VideoFrameDisplay(imagePath: fallbackImage, frameKey: _frameKey);
   }
 }

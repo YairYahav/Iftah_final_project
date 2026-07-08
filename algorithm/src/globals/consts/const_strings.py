@@ -45,6 +45,9 @@ class ConstStrings:
 
     # ? Log
     LOG_NAME_DEBUG = "debug"
+    LOG_NAME_INFO = "info"
+    LOG_NAME_WARNING = "warning"
+    LOG_NAME_ERROR = "error"
     LOG_ENV = "LOG_FILE_PATH"
     LOG_FILEPATH = "./logs/{}_{}.log"
     LOG_MODE = "a"
@@ -78,5 +81,23 @@ class ConstStrings:
 
 
     MOTION_STARTING = "Motion detection enabled"
+
+    # Motion detection algorithm config keys (must match keys in manager_factory algorithm_config dict)
+    MOTION_MIN_AREA = 'min_area'
+    MOTION_BG_VAR_THRESHOLD = 'threshold'
+    MOTION_DILATE_ITER = 'dilate_iter'
+    MOTION_ERODE_ITER = 'erode_iter'
+    MOTION_BG_HISTORY = 'history'
+    MOTION_DETECT_SHADOWS = 'detected_shadows'
+    MOTION_DRAW_BOUNDING_BOXES = 'draw_bounding_boxes'
+    MOTION_DRAW_MASK = 'draw_mask'
+    MOTION_MASK_RECT = 'mask_rect'
+    MOTION_BLUR_KERNEL = 'blur_kernel'       # Gaussian blur size before MOG2 (0 = off, must be odd)
+    MOTION_MERGE_BOXES = 'merge_boxes'       # Merge nearby bounding boxes into one
+    MOTION_MERGE_MARGIN = 'merge_margin'     # Pixel gap between boxes to still merge them
+    MOTION_MIN_ASPECT_RATIO = 'min_aspect_ratio'  # Filter boxes narrower than this (w/h)
+    MOTION_MAX_ASPECT_RATIO = 'max_aspect_ratio'  # Filter boxes wider than this (w/h)
+
+    SHM_PATH_TEMPLATE = "/dev/shm/cam{}"
     MOTION_REGION_COUNT = "Video {}: motion regions: {}"
     MOTION_ERROR = "Motion detection error: {}"

@@ -3,8 +3,13 @@ class Consts:
     ZMQ_SERVER_LOOP_DURATION = 0.01
     ZMQ_SUB_POLL_TIMEOUT = 1000
 
-    DEFAULT_WIDTH = 1080
-    DEFAULT_HEIGHT = 1920
+    ALGORITHM_VIDEO_WIDTH = 1280
+    ALGORITHM_VIDEO_HEIGHT = 720
+    ALGORITHM_VIDEO_FRAME_RATE = 30
+
+    # Default video dimensions (must match video_manager GStreamer pipeline output)
+    DEFAULT_WIDTH = 1280
+    DEFAULT_HEIGHT = 720
     DEFAULT_FRAME_RATE = 30
 
     # SHM reader open timeout in seconds

@@ -1,6 +1,6 @@
 import time
 
-import cv2
+import cv2 # type: ignore
 import os
 import numpy as np
 from infrastructure.interfaces.handlers.ivideo_handler import IVideoHandler
@@ -11,13 +11,14 @@ from infrastructure.factories.logger_factory import LoggerFactory
 
 
 class VideoHandler(IVideoHandler):
-    def __init__(self, video_id: int, video_path: str):
+    def __init__(self, video_id: int, video_path: str, width: int = Consts.FRAME_WIDTH, height: int = Consts.FRAME_HEIGHT):
         super().__init__()
         self._video_id = video_id
         self._video_path = video_path
-        self._frame_width = Consts.FRAME_WIDTH
-        self._frame_height = Consts.FRAME_HEIGHT
+        self._frame_width = width
+        self._frame_height = height
         self._frame_rate = Consts.FRAME_RATE
+        self._sleep_fps = Consts.FRAME_RATE  # pacing rate; updated to native fps after capture opens
         self._cap = None
         self._writer = None
         self._logger = LoggerFactory.get_logger_manager()
@@ -51,6 +52,12 @@ class VideoHandler(IVideoHandler):
             if self._cap:
                 self._cap.release()
             return None
+        elif not ret and not self._is_rtsp:
+            # End of file — loop back to beginning
+            self._cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            ret, frame = self._cap.read()
+            if not ret:
+                return None
         return frame
     
 
@@ -68,7 +75,7 @@ class VideoHandler(IVideoHandler):
             if not self._is_rtsp:
                 self._logger.log(ConstStrings.LOG_NAME_DEBUG, 
                                  LoggerMessages.FRAME_WRITTEN.format(self._video_id))
-                time.sleep(1.0 / max(float(self._frame_rate), 1))
+                time.sleep(1.0 / max(float(self._sleep_fps), 1))
         else:
             self._logger.log(ConstStrings.LOG_NAME_WARNING, 
                              LoggerMessages.VIDEO_WRITER_NOT_INITIALIZED.format(self._video_id))
@@ -137,11 +144,29 @@ class VideoHandler(IVideoHandler):
                 self._logger.log(ConstStrings.LOG_NAME_ERROR, 
                                  LoggerMessages.FAILED_TO_OPEN_VIDEO.format(self._video_id, self._video_path))
                 
+            # Read native fps for sleep pacing only; keep self._frame_rate = 30 for GStreamer pipeline
+            native_fps = self._cap.get(cv2.CAP_PROP_FPS)
+            if native_fps > 0:
+                self._sleep_fps = native_fps
+                self._logger.log(ConstStrings.LOG_NAME_DEBUG,
+                                 f"Video {self._video_id}: native FPS {native_fps:.3f} — using for write pacing")
+
             self._logger.log(ConstStrings.LOG_NAME_DEBUG, 
                              LoggerMessages.VIDEO_OPENED.format(self._video_id, self._video_path))
             
 
     def _init_write(self) -> None:
+        # Remove stale socket file from previous run so shmsink can bind cleanly
+        shm_socket = f"/dev/shm/cam{self._video_id}"
+        if os.path.exists(shm_socket):
+            try:
+                os.remove(shm_socket)
+                self._logger.log(ConstStrings.LOG_NAME_DEBUG,
+                                 f"Removed stale SHM socket {shm_socket}")
+            except OSError as e:
+                self._logger.log(ConstStrings.LOG_NAME_DEBUG,
+                                 f"Could not remove stale SHM socket {shm_socket}: {e}")
+
         videos_pipeline = self._construct_pipeline()
 
         self._logger.log(ConstStrings.LOG_NAME_DEBUG, 
@@ -160,7 +185,7 @@ class VideoHandler(IVideoHandler):
 
             if not self._writer.isOpened():
                 self._logger.log(ConstStrings.LOG_NAME_ERROR, 
-                                 f"Cannot open shared memory writer for video {self._video_id} at {shm_path}", level=ConstStrings.LOG_NAME_ERROR)
+                                 f"Cannot open shared memory writer for video {self._video_id} at {shm_path}")
                 raise ValueError(f"Cannot open shared memory writer for video {self._video_id} at {shm_path}")
             else:
                 self._logger.log(ConstStrings.LOG_NAME_DEBUG, 
@@ -170,22 +195,12 @@ class VideoHandler(IVideoHandler):
     def _construct_pipeline(self) -> str:
         shared_memory_path = ConstStrings.SHARED_MEMORY_CAM_PATH.format(camera_id=self._video_id)
 
-        if self._is_rtsp:
-            pipeline = ConstStrings.SHARED_MEMORY_PIPELINE.format(
-                frame_width=self._frame_width,
-                frame_height=self._frame_height,
-                frame_rate=self._frame_rate,
-                scaled_width=self._frame_width,
-                scaled_height=self._frame_height,
-                shared_memory_path=shared_memory_path
-            )
-        else:
-            pipeline = ConstStrings.SHARED_MEMORY_PIPELINE.format(
-                frame_width=self._frame_width,
-                frame_height=self._frame_height,
-                frame_rate=self._frame_rate,
-                scaled_width=self._frame_width,
-                scaled_height=self._frame_height,
-                shared_memory_path=shared_memory_path
-            )
+        pipeline = ConstStrings.SHARED_MEMORY_PIPELINE.format(
+            frame_width=self._frame_width,
+            frame_height=self._frame_height,
+            frame_rate=int(self._frame_rate),
+            scaled_width=self._frame_width,
+            scaled_height=self._frame_height,
+            shared_memory_path=shared_memory_path
+        )
         return pipeline

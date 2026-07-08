@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:typed_data'; 
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
@@ -75,9 +75,11 @@ class _VideoFrameDisplayState extends State<VideoFrameDisplay> {
   @override
   Widget build(BuildContext context) {
     if (_lastImage != null) {
-      return RawImage(
-        image: _lastImage,
-        fit: BoxFit.contain,
+      return Center(
+        child: RawImage(
+          image: _lastImage,
+          fit: BoxFit.contain,
+        ),
       );
     }
 

@@ -28,3 +28,9 @@ class LoggerMessages:
     MOTION_STARTING = "Motion detection enabled"
     MOTION_ERROR = "Motion detection error: {}"
     MOTION_REGION_COUNT = "Video {}: motion regions detected: {}"
+
+    SHM_RENDER_HANDLER_OPENED = "SHM reader opened: {}"
+    SHM_RENDER_HANDLER_WAITING = "SHM reader waiting for {}: attempt {}"
+    SHM_RENDER_HANDLER_RELEASE_FAILED = "SHM reader release failed for {}: {}"
+    SHM_RENDER_HANDLER_OPEN_TIMEOUT = "SHM reader timed out for {} after {} attempts"
+    SHM_RENDER_HANDLER_READ_FRAME_FAILED = "SHM reader failed to read frame from {}"
