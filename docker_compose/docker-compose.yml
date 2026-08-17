@@ -82,7 +82,7 @@ services:
       - 2181:2181
 
   kafka:
-    image: bitnamilegacy/kafka:3.4.1 # change the image depending on your OS/ARCH
+    image: soldevelo/kafka:3.4.1 # change the image depending on your OS/ARCH
     # image: bitnami/kafka:3.4.1 # change the image depending on your OS/ARCH
     network_mode: host
     depends_on:
